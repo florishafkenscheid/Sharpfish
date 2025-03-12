@@ -9,11 +9,6 @@ namespace Sharpfish
     internal class EngineOptions
     {
         private Dictionary<string, string> _options { get; set; }
-        private int _skillLevel { get; set; }
-        private int _threads { get; set; }
-        private int _hashSize { get; set; }
-        private int _multiPV { get; set; }
-        private bool _useNNUE { get; set; }
         private StockfishEngine _engine { get; set; }
 
 
@@ -31,9 +26,20 @@ namespace Sharpfish
                 };
 
             // Create command to send defaults to engine
+            ApplyAllOptions();
+        }
+
+        public void SetOption(string name,  string value)
+        {
+            _options[name] = value;
+        }
+
+        public void ApplyAllOptions()
+        {
             CommandBuilder commandBuilder = new CommandBuilder();
             string command = string.Empty; // TODO
-            engine.SendCommand(command);
+
+            _engine.SendCommand(command);
         }
     }
 }
