@@ -32,5 +32,10 @@ namespace Sharpfish
 
             throw new InvalidDataException("Response does not contain a bestmove");
         }
+
+        public static string ParseEvaluation(string response)
+        {
+            return response.Split(' ', StringSplitOptions.RemoveEmptyEntries)[2];
+        }
     }
 }

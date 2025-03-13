@@ -11,14 +11,13 @@ using System.Threading.Tasks;
 
 namespace Sharpfish
 {
-    internal class StockfishEngine : IStockfishEngine
+    public class StockfishEngine : IStockfishEngine
     {
         private readonly Process _process;
         private readonly StreamWriter _input;
         private readonly StreamReader _output;
 
-        private readonly object _padlock = new();
-        private bool _isDisposed;
+        //private readonly object _padlock = new();
 
         public StockfishEngine(string enginePath)
         {
@@ -33,7 +32,7 @@ namespace Sharpfish
                     RedirectStandardInput = true,
                 }
             };
-
+            _process.Start();
             _input = _process.StandardInput;
             _output = _process.StandardOutput;
         }
@@ -53,15 +52,22 @@ namespace Sharpfish
             await WriteLine(CommandBuilder.Position(fen));
         }
 
-        public async Task<string> GetBestMove(int? timeMs, CancellationToken cancellationToken = default)
+        public async Task<string> getEvaluation()
+        {
+            await WriteLine(CommandBuilder.Evaluate());
+            string response = await ReadUntil("Final evaluation");
+            return ResponseParser.ParseEvaluation(response);
+        }
+
+        public async Task<string> GetBestMove(int? timeMs = null, CancellationToken cancellationToken = default)
         {
             if (timeMs.HasValue)
             {
-                CommandBuilder.Go(timeMs.Value);
+                await WriteLine(CommandBuilder.Go(timeMs.Value));
             }
             else
             {
-                CommandBuilder.Go();
+                await WriteLine(CommandBuilder.Go());
             }
 
             string response = await ReadUntil("bestmove");
@@ -80,7 +86,7 @@ namespace Sharpfish
 
         public async Task<string> ReadUntil(string expected)
         {
-            Task? timeout = Task.Delay(TimeSpan.FromSeconds(1));
+            Task? timeout = Task.Delay(TimeSpan.FromSeconds(2));
             while (true)
             {
                 var lineTask = ReadLine();
@@ -118,7 +124,7 @@ namespace Sharpfish
         {
             // Regex: \s*^(((?:[rnbqkpRNBQKP1-8]+\/){7})[rnbqkpRNBQKP1-8]+)\s([b|w])\s(-|[K|Q|k|q]{1,4})\s(-|[a-h][1-8])\s(\d+\s\d+)$
             // From: https://gist.github.com/Dani4kor/e1e8b439115878f8c6dcf127a4ed5d3e
-            string pattern = "\\s*^(((?:[rnbqkpRNBQKP1-8]+\\/){7})[rnbqkpRNBQKP1-8]+)\\s([b|w])\\s(-|[K|Q|k|q]{1,4})\\s(-|[a-h][1-8])\\s(\\d+\\s\\d+)$";
+            string pattern = @"\s*^(((?:[rnbqkpRNBQKP1-8]+\/){7})[rnbqkpRNBQKP1-8]+)\s([b|w])\s(-|[K|Q|k|q]{1,4})\s(-|[a-h][1-8])\s(\d+\s\d+)$";
 
             if (Regex.IsMatch(fen, pattern))
             {
