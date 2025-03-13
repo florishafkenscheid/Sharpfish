@@ -26,7 +26,7 @@ namespace Sharpfish
                 {
                     throw new Exception("No valid best move was found");
                 }
-                
+
                 return parts[1];
             }
 

@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Sharpfish.Sharpfish;
 
 namespace Sharpfish
 {
@@ -17,10 +18,9 @@ namespace Sharpfish
         private readonly StreamWriter _input;
         private readonly StreamReader _output;
 
-        //private readonly object _padlock = new();
-
         public StockfishEngine(string enginePath)
         {
+            // Stockfish Process
             _process = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -35,6 +35,20 @@ namespace Sharpfish
             _process.Start();
             _input = _process.StandardInput;
             _output = _process.StandardOutput;
+
+            // Options
+            Dictionary<string, string> options = new Dictionary<string, string>()
+            {
+                { "Threads", "4" }, // Relatively low entry barrier, don't want to mess with detecting CPU
+                { "Hash", "256"}, // In MBs
+                { "MultiPV", "1"}, // Show only the best line
+                { "Skill Level", "20"}, // 0-20, default at 20
+            };
+
+            foreach (KeyValuePair<string, string> option in options)
+            {
+                _ = SetOption(option.Key, option.Value); // Needs a discard _ variable for some async reason
+            }
         }
         public async Task NewGame()
         {
@@ -150,10 +164,10 @@ namespace Sharpfish
                                 throw new Exception($"Two subsequent digits in position part of fen: {fen}");
                             }
 
-                            sum += (int)c;
+                            sum += c;
                             previous_was_digit = true;
                         }
-                        else if ("pnbrqk".Contains(Char.ToLower(c)))
+                        else if ("pnbrqk".Contains(char.ToLower(c)))
                         {
                             sum += 1;
                             previous_was_digit = false;
@@ -171,7 +185,8 @@ namespace Sharpfish
                 }
 
                 return true;
-            } else
+            }
+            else
             {
                 throw new Exception("Fen doesn`t match follow this example: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ");
             }
