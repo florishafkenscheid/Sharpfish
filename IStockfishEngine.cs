@@ -15,7 +15,7 @@ namespace Sharpfish
         Task SetOption(string key, string value);
         Task<bool> IsReady();
         Task<string> ReadUntil(string expected);
-        Task<string> ReadLine();
+        Task<string?> ReadLine();
         Task WriteLine(string line);
         bool ValidateFen(string fen);
         new void Dispose();

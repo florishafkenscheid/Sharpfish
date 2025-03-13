@@ -71,14 +71,14 @@ namespace Sharpfish
         {
             await WriteLine(CommandBuilder.SetOption(key, value));
         }
-        private async Task<bool> IsReady()
+        public async Task<bool> IsReady()
         {
             await WriteLine(CommandBuilder.IsReady());
             string response = await ReadUntil("readyok");
             return ResponseParser.ParseReadyOK(response);
         }
 
-        private async Task<string> ReadUntil(string expected)
+        public async Task<string> ReadUntil(string expected)
         {
             Task? timeout = Task.Delay(TimeSpan.FromSeconds(1));
             while (true)
@@ -104,7 +104,7 @@ namespace Sharpfish
             }
         }
 
-        private async Task<string?> ReadLine()
+        public async Task<string?> ReadLine()
         {
             return await _output.ReadLineAsync();
         }
@@ -114,7 +114,7 @@ namespace Sharpfish
             await _input.WriteLineAsync(line);
         }
 
-        private static bool ValidateFen(string fen)
+        public bool ValidateFen(string fen)
         {
             // Regex: \s*^(((?:[rnbqkpRNBQKP1-8]+\/){7})[rnbqkpRNBQKP1-8]+)\s([b|w])\s(-|[K|Q|k|q]{1,4})\s(-|[a-h][1-8])\s(\d+\s\d+)$
             // From: https://gist.github.com/Dani4kor/e1e8b439115878f8c6dcf127a4ed5d3e
