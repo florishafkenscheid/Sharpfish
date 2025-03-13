@@ -23,8 +23,10 @@ namespace Sharpfish
                     throw new InvalidDataException("Invalid bestmove format");
 
                 if (parts[1] == "(none)")
-                    return null;
-
+                {
+                    throw new Exception("No valid best move was found");
+                }
+                
                 return parts[1];
             }
 
