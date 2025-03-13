@@ -133,8 +133,7 @@ namespace Sharpfish
                 foreach (string fenPart in splitFen)
                 {
                     int sum = 0;
-                    bool previous_was_digit, previous_was_piece;
-                    previous_was_digit = previous_was_piece = false;
+                    bool previous_was_digit = false;
 
                     foreach (char c in fenPart)
                     {
@@ -147,13 +146,13 @@ namespace Sharpfish
 
                             sum += (int)c;
                             previous_was_digit = true;
-                            previous_was_piece = false;
-                        } else if ("pnbrqk".Contains(Char.ToLower(c)))
+                        }
+                        else if ("pnbrqk".Contains(Char.ToLower(c)))
                         {
                             sum += 1;
                             previous_was_digit = false;
-                            previous_was_piece = true;
-                        } else
+                        }
+                        else
                         {
                             throw new Exception($"Invalid character in position part of fen: {fen}");
                         }
