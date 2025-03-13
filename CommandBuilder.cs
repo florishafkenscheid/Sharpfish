@@ -6,23 +6,13 @@ using System.Threading.Tasks;
 
 namespace Sharpfish
 {
-    internal class CommandBuilder
+    internal static class CommandBuilder
     {
-        private const string UCI_NEW_GAME = "ucinewgame";
-        private const string POSITION = "position";
-        private const string GO = "go";
-        private const string STOP = "stop";
-        private const string SET_OPTION = "setoption name";
-        private const string IS_READY = "isready";
-        private const string QUIT = "quit";
-
-        public CommandBuilder() { }
-
-        public string BuildPositionCommand(ChessPosition position) { }
-
-        public string BuildGoCommand(int depth, int timeMs) { }
-        public string BuildSetOptionCommand(string name, string value) { }
-        public string BuildUciNewGameCommand() { }
-        public string BuildStopCommand() { }
+        public static string NewGame() => "ucinewgame";
+        public static string Position(string fen) => $"position fen {fen}";
+        public static string Go() => $"go depth 20";
+        public static string Go(int timeMs) => $"go movetime {timeMs}";
+        public static string SetOption(string name, string value) => $"setoption name {name} value {value}";
+        public static string IsReady() => "isready";
     }
 }

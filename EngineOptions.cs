@@ -3,21 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Sharpfish
 {
     internal class EngineOptions
     {
-        private Dictionary<string, string> _options { get; set; }
-        private StockfishEngine _engine { get; set; }
-
-
-        public EngineOptions(StockfishEngine engine)
+        public EngineOptions()
         {
-            _engine = engine;
-
             // Set defaults
-            _options = new Dictionary<string, string>()
+            Dictionary<string, string> options = new Dictionary<string, string>()
                 {
                     { "Threads", "4" }, // Relatively low entry barrier, don't want to mess with detecting CPU
                     { "Hash", "256"}, // In MBs
@@ -26,20 +21,15 @@ namespace Sharpfish
                 };
 
             // Create command to send defaults to engine
-            ApplyAllOptions();
+            foreach (KeyValuePair<string, string> option in options)
+            {
+                CommandBuilder.SetOption(option.Key, option.Value);
+            }
         }
 
         public void SetOption(string name,  string value)
         {
-            _options[name] = value;
-        }
-
-        public void ApplyAllOptions()
-        {
-            CommandBuilder commandBuilder = new CommandBuilder();
-            string command = string.Empty; // TODO
-
-            _engine.SendCommand(command);
+            CommandBuilder.SetOption(name, value);
         }
     }
 }

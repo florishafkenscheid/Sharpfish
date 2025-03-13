@@ -1,41 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Sharpfish
 {
-    internal class ResponseParser
+    internal static class ResponseParser
     {
-        private const string INFO_LINE = "info";
-        private const string BESTMOVE_LINE = "bestmove";
-        private const string READYOK = "readyok";
-        private Dictionary<string, Action<string>> _parsers;
-
-        public ResponseParser() 
+        public static bool ParseReadyOK(string response) => response?.Contains("readyok") == true;
+        public static string ParseBestMove(string response)
         {
-            _parsers = new Dictionary<string, Action<string>>();
-        }
+            if (response == null)
+                throw new ArgumentNullException(nameof(response));
 
-        public ChessMove ParseBestMove(string response)
-        {
-            return null;
-        }
+            if (response.StartsWith("bestmove "))
+            {
+                string[] parts = response.Split(' ');
 
-        public MoveAnalysis ParseMoveAnalysis(string response)
-        {
-            return null;
-        }
+                if (parts.Length < 2)
+                    throw new InvalidDataException("Invalid bestmove format");
 
-        public EngineOptions ParseEngineOptions(string response)
-        {
-            return null;
-        }
+                if (parts[1] == "(none)")
+                    return null;
 
-        public bool ParseReadyOk(string response)
-        {
-            return true;
+                return parts[1];
+            }
+
+            throw new InvalidDataException("Response does not contain a bestmove");
         }
     }
 }
