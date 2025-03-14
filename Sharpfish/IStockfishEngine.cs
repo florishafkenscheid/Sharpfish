@@ -10,8 +10,8 @@ namespace Sharpfish
     public interface IStockfishEngine : IDisposable
     {
         Task NewGame();
-        Task setFenPosition(string fen);
-        Task<string> getEvaluation();
+        Task SetFenPosition(string fen);
+        Task<string> GetEvaluation();
         Task<string> GetBestMove(int? timeMs = null, CancellationToken cancellationToken = default);
         Task SetOption(string key, string value);
         Task<bool> IsReady();
