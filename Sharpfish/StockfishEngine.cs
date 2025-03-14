@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Sharpfish.Sharpfish;
+using Sharpfish;
 
 namespace Sharpfish
 {
@@ -59,14 +59,14 @@ namespace Sharpfish
             }
         }
 
-        public async Task setFenPosition(string fen)
+        public async Task SetFenPosition(string fen)
         {
             if (!ValidateFen(fen)) throw new ArgumentException("Invalid FEN");
 
             await WriteLine(CommandBuilder.Position(fen));
         }
 
-        public async Task<string> getEvaluation()
+        public async Task<string> GetEvaluation()
         {
             await WriteLine(CommandBuilder.Evaluate());
             string response = await ReadUntil("Final evaluation");
