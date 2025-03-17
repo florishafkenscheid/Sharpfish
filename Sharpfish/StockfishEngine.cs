@@ -36,6 +36,7 @@ namespace Sharpfish
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     RedirectStandardInput = true,
+                    CreateNoWindow = true,
                 }
             };
             _process.Start();
