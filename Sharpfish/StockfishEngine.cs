@@ -194,7 +194,9 @@ namespace Sharpfish
 
         public void Dispose()
         {
-            _process.Close();
+            _input?.Dispose();
+            _output?.Dispose();
+            _process?.Dispose();
         }
 
         ~StockfishEngine()
