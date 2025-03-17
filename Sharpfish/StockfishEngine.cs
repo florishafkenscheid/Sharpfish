@@ -2,18 +2,24 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Markup;
 using Sharpfish;
 
 namespace Sharpfish
 {
     public class StockfishEngine : IStockfishEngine
+
     {
+        public int Depth { get;  set; }
+        public int MultiPV { get;  set; }
+
         private readonly Process _process;
         private readonly StreamWriter _input;
         private readonly StreamReader _output;
@@ -37,6 +43,8 @@ namespace Sharpfish
             _output = _process.StandardOutput;
 
             // Options
+            Depth = 20;
+
             Dictionary<string, string> options = new Dictionary<string, string>()
             {
                 { "Threads", "4" }, // Relatively low entry barrier, don't want to mess with detecting CPU
@@ -59,11 +67,16 @@ namespace Sharpfish
             }
         }
 
-        public async Task SetFenPosition(string fen)
+        public async Task SetPosition(string fen)
         {
             if (!ValidateFen(fen)) throw new ArgumentException("Invalid FEN");
 
             await WriteLine(CommandBuilder.Position(fen));
+        }
+
+        public async Task SetPosition(string[] moves)
+        {
+            await WriteLine(CommandBuilder.Position(moves));
         }
 
         public async Task<string> GetEvaluation()
@@ -81,7 +94,7 @@ namespace Sharpfish
             }
             else
             {
-                await WriteLine(CommandBuilder.Go());
+                await WriteLine(CommandBuilder.Go(Depth));
             }
 
             string response = await ReadUntil("bestmove");
@@ -89,18 +102,25 @@ namespace Sharpfish
         }
         public async Task SetOption(string key, string value)
         {
+            if (key == "MultiPV")
+            {
+                MultiPV = int.Parse(value);
+            }
+
+            Console.WriteLine($"SetOption called with key: {key}, value: {value}");
             await WriteLine(CommandBuilder.SetOption(key, value));
         }
+
         public async Task<bool> IsReady()
         {
             await WriteLine(CommandBuilder.IsReady());
-            string response = await ReadUntil("readyok");
+            var response = await ReadUntil("readyok");
             return ResponseParser.ParseReadyOK(response);
         }
 
-        public async Task<string> ReadUntil(string expected)
+        public async Task<string> ReadUntil(params string[] expected)
         {
-            Task? timeout = Task.Delay(TimeSpan.FromSeconds(2));
+            Task timeout = Task.Delay(TimeSpan.FromSeconds(100));
             while (true)
             {
                 var lineTask = ReadLine();
@@ -117,7 +137,8 @@ namespace Sharpfish
                     throw new InvalidOperationException("No output from engine stream");
                 }
 
-                if (line.Contains(expected))
+                bool allValuesFound = expected.All(value => line.Contains(value));
+                if (allValuesFound)
                 {
                     return line;
                 }
@@ -192,6 +213,21 @@ namespace Sharpfish
             }
         }
 
+        public async Task<Dictionary<int, string[]>> GetPV()
+        {
+            Dictionary<int, string[]> pv = new Dictionary<int, string[]>();
+            
+            
+            await WriteLine(CommandBuilder.Go(Depth));
+
+            for (int i = 1; i <= MultiPV; i++)
+            {
+                string response = await ReadUntil($"info depth {Depth}", $"multipv {i}");
+                pv[i] = ResponseParser.ParsePV(response);
+            }
+            return pv;
+        }
+
         public void Dispose()
         {
             _input?.Dispose();
@@ -203,5 +239,8 @@ namespace Sharpfish
         {
             Dispose();
         }
+
+
+        
     }
 }

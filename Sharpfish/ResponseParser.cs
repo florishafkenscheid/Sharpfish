@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Sharpfish
 {
-    internal static class ResponseParser
+    public static class ResponseParser
     {
         public static bool ParseReadyOK(string response) => response?.Contains("readyok") == true;
         public static string ParseBestMove(string response)
@@ -35,7 +35,24 @@ namespace Sharpfish
 
         public static string ParseEvaluation(string response)
         {
-            return response.Split(' ', StringSplitOptions.RemoveEmptyEntries)[2];
+            return response.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[2];
+        }
+
+        public static string[] ParsePV(string response)
+        {
+            if (response == null)
+                throw new ArgumentNullException(nameof(response));
+
+            if (response.StartsWith("info"))
+            {
+                return response
+                    .Split(' ')
+                    .Skip(21) // Skip the first 21 elements (info part)
+                    .ToArray();
+            }
+
+            return null;
+
         }
     }
-}
+    }
