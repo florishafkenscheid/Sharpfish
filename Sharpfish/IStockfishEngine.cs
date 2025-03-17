@@ -18,10 +18,11 @@ namespace Sharpfish
         Task<string> GetBestMove(int? timeMs = null, CancellationToken cancellationToken = default);
         Task SetOption(string key, string value);
         Task<bool> IsReady();
-        Task<string> ReadUntil(string expected);
+        Task<string> ReadUntil(params string[] expected);
         Task<string?> ReadLine();
         Task WriteLine(string line);
         bool ValidateFen(string fen);
+        Task<Dictionary<int, string[]>> GetPV();
         new void Dispose();
     }
 }

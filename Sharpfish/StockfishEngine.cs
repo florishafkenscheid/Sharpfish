@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Markup;
 using Sharpfish;
 
 namespace Sharpfish
@@ -49,7 +50,6 @@ namespace Sharpfish
                 { "Threads", "4" }, // Relatively low entry barrier, don't want to mess with detecting CPU
                 { "Hash", "256"}, // In MBs
                 { "MultiPV", "1"}, // Show only the best line
-                { "Depth", "20"}, // Default depth
                 { "Skill Level", "20"}, // 0-20, default at 20
             };
 
@@ -102,6 +102,11 @@ namespace Sharpfish
         }
         public async Task SetOption(string key, string value)
         {
+            if (key == "MultiPV")
+            {
+                MultiPV = int.Parse(value);
+            }
+
             Console.WriteLine($"SetOption called with key: {key}, value: {value}");
             await WriteLine(CommandBuilder.SetOption(key, value));
         }
@@ -109,13 +114,13 @@ namespace Sharpfish
         public async Task<bool> IsReady()
         {
             await WriteLine(CommandBuilder.IsReady());
-            string response = await ReadUntil("readyok");
+            var response = await ReadUntil("readyok");
             return ResponseParser.ParseReadyOK(response);
         }
 
-        public async Task<string> ReadUntil(string expected)
+        public async Task<string> ReadUntil(params string[] expected)
         {
-            Task timeout = Task.Delay(TimeSpan.FromSeconds(2));
+            Task timeout = Task.Delay(TimeSpan.FromSeconds(100));
             while (true)
             {
                 var lineTask = ReadLine();
@@ -132,7 +137,8 @@ namespace Sharpfish
                     throw new InvalidOperationException("No output from engine stream");
                 }
 
-                if (line.Contains(expected))
+                bool allValuesFound = expected.All(value => line.Contains(value));
+                if (allValuesFound)
                 {
                     return line;
                 }
@@ -205,6 +211,21 @@ namespace Sharpfish
             {
                 throw new Exception("Fen doesn`t match follow this example: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ");
             }
+        }
+
+        public async Task<Dictionary<int, string[]>> GetPV()
+        {
+            Dictionary<int, string[]> pv = new Dictionary<int, string[]>();
+            
+            
+            await WriteLine(CommandBuilder.Go(Depth));
+
+            for (int i = 1; i <= MultiPV; i++)
+            {
+                string response = await ReadUntil($"info depth {Depth}", $"multipv {i}");
+                pv[i] = ResponseParser.ParsePV(response);
+            }
+            return pv;
         }
 
         public void Dispose()
