@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -35,8 +35,8 @@ namespace Sharpfish
 
         public static string ParseEvaluation(string response)
         {
-            return response.Split(' ', StringSplitOptions.RemoveEmptyEntries)[2];
+            return response.Split(' ', (char)StringSplitOptions.RemoveEmptyEntries)[2];
         }
-        public static Dictionary<int, string[]> ParsePV(string[] responses)
+        //public static Dictionary<int, string[]> ParsePV(string[] responses)
     }
 }

@@ -2,18 +2,23 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Sharpfish;
 
 namespace Sharpfish
 {
     public class StockfishEngine : IStockfishEngine
+
     {
+        public int Depth { get;  set; }
+        public int MultiPV { get;  set; }
+
         private readonly Process _process;
         private readonly StreamWriter _input;
         private readonly StreamReader _output;
@@ -37,12 +42,14 @@ namespace Sharpfish
             _output = _process.StandardOutput;
 
             // Options
+            Depth = 20;
+
             Dictionary<string, string> options = new Dictionary<string, string>()
             {
                 { "Threads", "4" }, // Relatively low entry barrier, don't want to mess with detecting CPU
                 { "Hash", "256"}, // In MBs
                 { "MultiPV", "1"}, // Show only the best line
-                {"Depth", "20"}, // Default depth
+                { "Depth", "20"}, // Default depth
                 { "Skill Level", "20"}, // 0-20, default at 20
             };
 
@@ -60,11 +67,16 @@ namespace Sharpfish
             }
         }
 
-        public async Task SetFenPosition(string fen)
+        public async Task SetPosition(string fen)
         {
             if (!ValidateFen(fen)) throw new ArgumentException("Invalid FEN");
 
             await WriteLine(CommandBuilder.Position(fen));
+        }
+
+        public async Task SetPosition(string[] moves)
+        {
+            await WriteLine(CommandBuilder.Position(moves));
         }
 
         public async Task<string> GetEvaluation()
@@ -82,7 +94,7 @@ namespace Sharpfish
             }
             else
             {
-                await WriteLine(CommandBuilder.Go());
+                await WriteLine(CommandBuilder.Go(Depth));
             }
 
             string response = await ReadUntil("bestmove");
@@ -90,8 +102,10 @@ namespace Sharpfish
         }
         public async Task SetOption(string key, string value)
         {
+            Console.WriteLine($"SetOption called with key: {key}, value: {value}");
             await WriteLine(CommandBuilder.SetOption(key, value));
         }
+
         public async Task<bool> IsReady()
         {
             await WriteLine(CommandBuilder.IsReady());
@@ -101,7 +115,7 @@ namespace Sharpfish
 
         public async Task<string> ReadUntil(string expected)
         {
-            Task? timeout = Task.Delay(TimeSpan.FromSeconds(2));
+            Task timeout = Task.Delay(TimeSpan.FromSeconds(2));
             while (true)
             {
                 var lineTask = ReadLine();
@@ -206,7 +220,6 @@ namespace Sharpfish
         }
 
 
-        public int Depth { get; private set; }
-        public int MultiPv { get; private set; }
+        
     }
 }
