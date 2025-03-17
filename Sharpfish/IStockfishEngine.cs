@@ -19,6 +19,8 @@ namespace Sharpfish
         Task<string?> ReadLine();
         Task WriteLine(string line);
         bool ValidateFen(string fen);
+        int Depth
+        int MultiPv
         new void Dispose();
     }
 }

@@ -42,6 +42,7 @@ namespace Sharpfish
                 { "Threads", "4" }, // Relatively low entry barrier, don't want to mess with detecting CPU
                 { "Hash", "256"}, // In MBs
                 { "MultiPV", "1"}, // Show only the best line
+                {"Depth", "20"}, // Default depth
                 { "Skill Level", "20"}, // 0-20, default at 20
             };
 
@@ -203,5 +204,9 @@ namespace Sharpfish
         {
             Dispose();
         }
+
+
+        public int Depth { get; private set; }
+        public int MultiPv { get; private set; }
     }
 }

@@ -37,5 +37,6 @@ namespace Sharpfish
         {
             return response.Split(' ', StringSplitOptions.RemoveEmptyEntries)[2];
         }
+        public static Dictionary<int, string[]> ParsePV(string[] responses)
     }
 }
