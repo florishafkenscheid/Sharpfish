@@ -62,10 +62,6 @@ namespace Sharpfish
         public async Task NewGame()
         {
             await WriteLine(CommandBuilder.NewGame());
-            if (!await IsReady())
-            {
-                throw new Exception("Engine not ready when starting new game");
-            }
         }
 
         public async Task SetPosition(string fen)
