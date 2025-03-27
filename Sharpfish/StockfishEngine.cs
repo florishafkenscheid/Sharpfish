@@ -104,7 +104,6 @@ namespace Sharpfish
                 MultiPV = int.Parse(value);
             }
 
-            Console.WriteLine($"SetOption called with key: {key}, value: {value}");
             await WriteLine(CommandBuilder.SetOption(key, value));
         }
 
