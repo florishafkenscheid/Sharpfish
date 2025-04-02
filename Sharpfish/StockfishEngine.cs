@@ -84,11 +84,7 @@ namespace Sharpfish
             return ResponseParser.ParseEvaluation(response);
         }
 
-<<<<<<< HEAD
-        public async Task<string> GetBestMove(int? timeMs = null, CancellationToken cancellationToken = default)
-=======
         public async Task<string> GetBestMove(double? timeMs = null)
->>>>>>> 882d7c4 (Added .sln, made tests, fixed everything that needed to be fixed)
         {
             if (timeMs.HasValue)
             {
@@ -165,16 +161,6 @@ namespace Sharpfish
             if (Regex.IsMatch(fen, pattern))
             {
                 MatchCollection regexList = Regex.Matches(fen, pattern);
-<<<<<<< HEAD
-                string[] splitFen = regexList[0].ToString().Split('/');
-
-                if (splitFen.Length != 8)
-                {
-                    throw new Exception($"Expected 8 rows in position part of fen: {fen}");
-                }
-
-                foreach (string fenPart in splitFen)
-=======
                 string[] splitFen = regexList[0].ToString().Split('/', ' ');
                 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
                 // Into [rnbqkbnr, pppppppp, 8, 8, 8, 8, PPPPPPPP, RNBQKBNR, w, KQkq, -, 0, 1]
@@ -185,16 +171,11 @@ namespace Sharpfish
                 }
 
                 for (int i = 0; i < 8; i++) // 8 = splitFen[0-7], so stops before player to move indicator (w|b)
->>>>>>> 882d7c4 (Added .sln, made tests, fixed everything that needed to be fixed)
                 {
                     int sum = 0;
                     bool previous_was_digit = false;
 
-<<<<<<< HEAD
-                    foreach (char c in fenPart)
-=======
                     foreach (char c in splitFen[i])
->>>>>>> 882d7c4 (Added .sln, made tests, fixed everything that needed to be fixed)
                     {
                         if ("12345678".Contains(c))
                         {
@@ -203,11 +184,7 @@ namespace Sharpfish
                                 throw new Exception($"Two subsequent digits in position part of fen: {fen}");
                             }
 
-<<<<<<< HEAD
-                            sum += c;
-=======
                             sum += int.Parse(c.ToString());
->>>>>>> 882d7c4 (Added .sln, made tests, fixed everything that needed to be fixed)
                             previous_was_digit = true;
                         }
                         else if ("pnbrqk".Contains(char.ToLower(c)))
@@ -220,18 +197,11 @@ namespace Sharpfish
                             throw new Exception($"Invalid character in position part of fen: {fen}");
                         }
                     }
-<<<<<<< HEAD
 
-=======
->>>>>>> 882d7c4 (Added .sln, made tests, fixed everything that needed to be fixed)
                     if (sum != 8)
                     {
                         throw new Exception($"Expected 8 columns per row in position part of fen: {fen}");
                     }
-<<<<<<< HEAD
-=======
-
->>>>>>> 882d7c4 (Added .sln, made tests, fixed everything that needed to be fixed)
                 }
 
                 return true;
@@ -244,12 +214,7 @@ namespace Sharpfish
 
         public async Task<Dictionary<int, string[]>> GetPV()
         {
-<<<<<<< HEAD
-            Dictionary<int, string[]> pv = new Dictionary<int, string[]>();
-=======
             Dictionary<int, string[]> pv = [];
->>>>>>> 882d7c4 (Added .sln, made tests, fixed everything that needed to be fixed)
-            
             
             await WriteLine(CommandBuilder.Go(Depth));
 

@@ -35,9 +35,6 @@ namespace Sharpfish
 
         public static string ParseEvaluation(string response)
         {
-<<<<<<< HEAD
-            return response.Split([' '], StringSplitOptions.RemoveEmptyEntries)[2];
-=======
             try
             {
                 return response.Split([' '], StringSplitOptions.RemoveEmptyEntries)[2];
@@ -46,7 +43,6 @@ namespace Sharpfish
             {
                 throw new InvalidDataException("Invalid evaluation format: not enough parts in the response");
             }
->>>>>>> 882d7c4 (Added .sln, made tests, fixed everything that needed to be fixed)
         }
 
         public static string[] ParsePV(string response)
