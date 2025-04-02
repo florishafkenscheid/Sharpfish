@@ -40,8 +40,7 @@ namespace Sharpfish
 
         public static string[] ParsePV(string response)
         {
-            if (response == null)
-                throw new ArgumentNullException(nameof(response));
+            ArgumentNullException.ThrowIfNull(response);
 
             if (response.StartsWith("info"))
             {
@@ -50,9 +49,10 @@ namespace Sharpfish
                     .Skip(21) // Skip the first 21 elements (info part)
                     .ToArray();
             }
-
-            return null;
-
+            else
+            {
+                return [];
+            }
         }
     }
-    }
+}
