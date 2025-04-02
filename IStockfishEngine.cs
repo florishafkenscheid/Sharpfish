@@ -15,7 +15,7 @@ namespace Sharpfish
         Task SetPosition(string fen);
         Task SetPosition(string[] moves);
         Task<string> GetEvaluation();
-        Task<string> GetBestMove(int? timeMs = null, CancellationToken cancellationToken = default);
+        Task<string> GetBestMove(double? timeMs = null);
         Task SetOption(string key, string value);
         Task<bool> IsReady();
         Task<string> ReadUntil(params string[] expected);

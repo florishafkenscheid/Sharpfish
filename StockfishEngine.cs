@@ -84,7 +84,7 @@ namespace Sharpfish
             return ResponseParser.ParseEvaluation(response);
         }
 
-        public async Task<string> GetBestMove(int? timeMs = null, CancellationToken cancellationToken = default)
+        public async Task<string> GetBestMove(double? timeMs = null)
         {
             if (timeMs.HasValue)
             {
@@ -161,19 +161,21 @@ namespace Sharpfish
             if (Regex.IsMatch(fen, pattern))
             {
                 MatchCollection regexList = Regex.Matches(fen, pattern);
-                string[] splitFen = regexList[0].ToString().Split('/');
+                string[] splitFen = regexList[0].ToString().Split('/', ' ');
+                // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+                // Into [rnbqkbnr, pppppppp, 8, 8, 8, 8, PPPPPPPP, RNBQKBNR, w, KQkq, -, 0, 1]
 
-                if (splitFen.Length != 8)
+                if (splitFen.Length != 13)
                 {
-                    throw new Exception($"Expected 8 rows in position part of fen: {fen}");
+                    throw new Exception($"Expected 13 rows in fen: {fen}");
                 }
 
-                foreach (string fenPart in splitFen)
+                for (int i = 0; i < 8; i++) // 8 = splitFen[0-7], so stops before player to move indicator (w|b)
                 {
                     int sum = 0;
                     bool previous_was_digit = false;
 
-                    foreach (char c in fenPart)
+                    foreach (char c in splitFen[i])
                     {
                         if ("12345678".Contains(c))
                         {
@@ -182,7 +184,7 @@ namespace Sharpfish
                                 throw new Exception($"Two subsequent digits in position part of fen: {fen}");
                             }
 
-                            sum += c;
+                            sum += int.Parse(c.ToString());
                             previous_was_digit = true;
                         }
                         else if ("pnbrqk".Contains(char.ToLower(c)))
@@ -195,11 +197,11 @@ namespace Sharpfish
                             throw new Exception($"Invalid character in position part of fen: {fen}");
                         }
                     }
-
                     if (sum != 8)
                     {
                         throw new Exception($"Expected 8 columns per row in position part of fen: {fen}");
                     }
+
                 }
 
                 return true;
@@ -212,7 +214,7 @@ namespace Sharpfish
 
         public async Task<Dictionary<int, string[]>> GetPV()
         {
-            Dictionary<int, string[]> pv = new Dictionary<int, string[]>();
+            Dictionary<int, string[]> pv = [];
             
             
             await WriteLine(CommandBuilder.Go(Depth));
@@ -230,12 +232,15 @@ namespace Sharpfish
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
             {
                 if (disposing)
                 {
+                    // Flush streamwriter
+                    _input?.Flush();
                     _input?.Dispose();
                     _output?.Dispose();
 
@@ -250,6 +255,7 @@ namespace Sharpfish
                 _disposed = true;
             }
         }
+
 
         ~StockfishEngine()
         {
