@@ -35,7 +35,7 @@ namespace Sharpfish
 
         public static string ParseEvaluation(string response)
         {
-            return response.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[2];
+            return response.Split([' '], StringSplitOptions.RemoveEmptyEntries)[2];
         }
 
         public static string[] ParsePV(string response)
