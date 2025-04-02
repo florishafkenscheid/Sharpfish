@@ -23,6 +23,7 @@ namespace Sharpfish
         private readonly Process _process;
         private readonly StreamWriter _input;
         private readonly StreamReader _output;
+        private bool _disposed = false; // Prevent chance of double disposal
 
         public StockfishEngine(string enginePath)
         {
@@ -226,17 +227,33 @@ namespace Sharpfish
 
         public void Dispose()
         {
-            _input?.Dispose();
-            _output?.Dispose();
-            _process?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _input?.Dispose();
+                    _output?.Dispose();
+
+                    // Terminate before dispose
+                    if (_process != null && !_process.HasExited)
+                    {
+                        _process.Kill();
+                    }
+                    _process?.Dispose();
+                }
+
+                _disposed = true;
+            }
         }
 
         ~StockfishEngine()
         {
-            Dispose();
+            Dispose(false);
         }
-
-
-        
     }
 }
