@@ -35,7 +35,14 @@ namespace Sharpfish
 
         public static string ParseEvaluation(string response)
         {
-            return response.Split([' '], StringSplitOptions.RemoveEmptyEntries)[2];
+            try
+            {
+                return response.Split([' '], StringSplitOptions.RemoveEmptyEntries)[2];
+            }
+            catch (IndexOutOfRangeException)
+            {
+                throw new InvalidDataException("Invalid evaluation format: not enough parts in the response");
+            }
         }
 
         public static string[] ParsePV(string response)
