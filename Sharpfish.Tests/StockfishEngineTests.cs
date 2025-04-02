@@ -126,19 +126,6 @@ public class StockfishEngineTests
     }
 
     [Test]
-    public void Dispose_ReleasesResources()
-    {
-        // Arrange
-        var engine = new StockfishEngine(path);
-
-        // Act
-        engine.Dispose();
-
-        // Assert - difficult to directly test, but we can check that disposing twice doesn't throw
-        Assert.DoesNotThrow(() => engine.Dispose());
-    }
-
-    [Test]
     public async Task MultipleQueries_WorkCorrectly()
     {
         // Arrange
@@ -173,6 +160,19 @@ public class StockfishEngineTests
 
         // Assert - Hard to directly verify depth was used, but no exception means it worked
         Assert.Pass("Successfully completed analysis with modified depth");
+    }
+
+    [Test]
+    public void Dispose_ReleasesResources()
+    {
+        // Arrange
+        var engine = new StockfishEngine(path);
+
+        // Act
+        engine.Dispose();
+
+        // Assert - difficult to directly test, but we can check that disposing twice doesn't throw
+        Assert.DoesNotThrow(() => engine.Dispose());
     }
 
     private static bool IsChessNotation(string move)
