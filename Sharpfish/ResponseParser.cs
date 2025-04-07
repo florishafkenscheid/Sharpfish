@@ -12,8 +12,7 @@ namespace Sharpfish
         public static bool ParseReadyOK(string response) => response?.Contains("readyok") == true;
         public static string ParseBestMove(string response)
         {
-            if (response == null)
-                throw new ArgumentNullException(nameof(response));
+            ArgumentNullException.ThrowIfNull(response);
 
             if (response.StartsWith("bestmove "))
             {
