@@ -14,8 +14,10 @@ using Sharpfish;
 
 namespace Sharpfish
 {
+    /// <summary>
+    /// Provides an implementation of <see cref="IStockfishEngine"/> to communicate with the Stockfish chess engine.
+    /// </summary>
     public class StockfishEngine : IStockfishEngine
-
     {
         public int Depth { get;  set; }
         public int MultiPV { get;  set; }
@@ -25,6 +27,11 @@ namespace Sharpfish
         private readonly StreamReader _output;
         private bool _disposed = false; // Prevent chance of double disposal
 
+        /// <summary>
+        /// Initializes a new instance of the Stockfish engine process.
+        /// </summary>
+        /// <param name="enginePath">The file path to the Stockfish executable.</param>
+        /// <exception cref="FileNotFoundException">Thrown if the engine path is invalid.</exception>
         public StockfishEngine(string enginePath)
         {
             // Stockfish Process
@@ -60,11 +67,14 @@ namespace Sharpfish
                 _ = SetOption(option.Key, option.Value); // Needs a discard _ variable for some async reason
             }
         }
+
+        /// <inheritdoc/>
         public async Task NewGame()
         {
             await WriteLine(CommandBuilder.NewGame());
         }
 
+        /// <inheritdoc/>
         public async Task SetPosition(string fen)
         {
             if (!ValidateFen(fen)) throw new ArgumentException("Invalid FEN");
@@ -72,11 +82,13 @@ namespace Sharpfish
             await WriteLine(CommandBuilder.Position(fen));
         }
 
+        /// <inheritdoc/>
         public async Task SetPosition(string[] moves)
         {
             await WriteLine(CommandBuilder.Position(moves));
         }
 
+        /// <inheritdoc/>
         public async Task<string> GetEvaluation()
         {
             await WriteLine(CommandBuilder.Evaluate());
@@ -84,6 +96,7 @@ namespace Sharpfish
             return ResponseParser.ParseEvaluation(response);
         }
 
+        /// <inheritdoc/>
         public async Task<string> GetBestMove(double? timeMs = null)
         {
             if (timeMs.HasValue)
@@ -98,6 +111,8 @@ namespace Sharpfish
             string response = await ReadUntil("bestmove");
             return ResponseParser.ParseBestMove(response);
         }
+
+        /// <inheritdoc/>
         public async Task SetOption(string key, string value)
         {
             if (key == "MultiPV")
@@ -108,6 +123,7 @@ namespace Sharpfish
             await WriteLine(CommandBuilder.SetOption(key, value));
         }
 
+        /// <inheritdoc/>
         public async Task<bool> IsReady()
         {
             await WriteLine(CommandBuilder.IsReady());
@@ -115,6 +131,7 @@ namespace Sharpfish
             return ResponseParser.ParseReadyOK(response);
         }
 
+        /// <inheritdoc/>
         public async Task<string> ReadUntil(params string[] expected)
         {
             Task timeout = Task.Delay(TimeSpan.FromSeconds(100));
@@ -142,16 +159,19 @@ namespace Sharpfish
             }
         }
 
+        /// <inheritdoc/>
         public async Task<string?> ReadLine()
         {
             return await _output.ReadLineAsync();
         }
 
+        /// <inheritdoc/>
         public async Task WriteLine(string line)
         {
             await _input.WriteLineAsync(line);
         }
 
+        /// <inheritdoc/>
         public bool ValidateFen(string fen)
         {
             // Regex: \s*^(((?:[rnbqkpRNBQKP1-8]+\/){7})[rnbqkpRNBQKP1-8]+)\s([b|w])\s(-|[K|Q|k|q]{1,4})\s(-|[a-h][1-8])\s(\d+\s\d+)$
@@ -212,6 +232,7 @@ namespace Sharpfish
             }
         }
 
+        /// <inheritdoc/>
         public async Task<Dictionary<int, string[]>> GetPV()
         {
             Dictionary<int, string[]> pv = [];
@@ -226,11 +247,14 @@ namespace Sharpfish
             return pv;
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+        /// <inheritdoc/>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
