@@ -175,6 +175,53 @@ public class StockfishEngineTests
         Assert.DoesNotThrow(() => engine.Dispose());
     }
 
+    [Test]
+    public async Task PlayFullGame_WithUserAndEngineMoves_CompletesSuccessfully()
+    {
+        // Arrange - Simulate a short game with user and engine alternating moves
+        string[] userMoves = ["e2e4", "g1f3", "f1c4"]; // User moves: e4, Nf3, Bc4
+        List<string> allMoves = []; // Track ALL moves (user + engine)
+        List<string> engineResponses = [];
+
+        await _engine.NewGame();
+
+        foreach (var userMove in userMoves)
+        {
+            // Add the user's move and update the position
+            allMoves.Add(userMove);
+            await _engine.SetPosition(allMoves.ToArray());
+
+            // Get the engine's response and add it to the move list
+            string engineMove = await _engine.GetBestMove(timeMs: 500);
+            engineResponses.Add(engineMove);
+            allMoves.Add(engineMove);
+        }
+
+        // Assert - Validate all engine responses
+        Assert.Multiple(() =>
+        {
+            Assert.That(engineResponses, Has.Count.EqualTo(3), "Expected 3 engine responses");
+            foreach (var move in engineResponses)
+            {
+                Assert.That(IsChessNotation(move), Is.True, $"Invalid engine move: {move}");
+            }
+        });
+    }
+
+    [Test]
+    public void CheckmatePosition_EngineRecognizesNoValidMoves_ThrowsException()
+    {
+        // Arrange - Position where Black is checkmated (White's turn)
+        string checkmateFen = "8/k1K5/8/Q7/8/8/8/8 b - - 0 1"; // White can deliver checkmate
+
+        // Act & Assert - Engine should throw when no legal moves exist for the opponent
+        Assert.ThrowsAsync<Exception>(async () =>
+        {
+            await _engine.SetPosition(checkmateFen);
+            await _engine.GetBestMove(timeMs: 500); // Engine (Black) has no valid moves
+        }, "Engine should throw when no legal moves exist in checkmate");
+    }
+
     private static bool IsChessNotation(string move)
     {
         if (string.IsNullOrEmpty(move) || move.Length < 4)
